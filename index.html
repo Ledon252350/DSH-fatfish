@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepSeek 小鲸鱼 网页挂件</title>
+<style>
+  :root{--ink:#111;--ink-2:#666;--line:rgba(17,24,39,.1);--card:#fff;--bg:#f6f7fb;--code:#f3f4f6}
+  @media (prefers-color-scheme:dark){
+    :root{--ink:#f4f4f5;--ink-2:#a1a1aa;--line:rgba(255,255,255,.12);--card:#18181b;--bg:#0b0b0e;--code:#232327}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",system-ui,sans-serif}
+  .page{max-width:1040px;margin:0 auto;padding:44px 24px 64px}
+  h1{font-size:22px;font-weight:600;margin:0 0 6px}
+  h2{font-size:14px;font-weight:600;margin:30px 0 10px}
+  .sub{color:var(--ink-2);margin:0 0 24px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:820px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:.5px solid var(--line);border-radius:14px;overflow:hidden}
+  .card header{padding:10px 14px;border-bottom:.5px solid var(--line);font-size:12px;color:var(--ink-2)}
+  .chat{position:relative;height:380px;padding:16px 14px;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+  .card.dark .chat{background:#101014;color:#e4e4e7}
+  .msg{max-width:76%;padding:8px 12px;border-radius:14px;background:rgba(17,24,39,.055);font-size:13px}
+  .card.dark .msg{background:rgba(255,255,255,.08)}
+  .msg.me{align-self:flex-end;background:#4D6BFE;color:#fff}
+  .thinking{border:.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;color:var(--ink-2);background:rgba(77,107,254,.05)}
+  .thinking b{color:var(--ink);font-weight:500}
+  .hint{margin:26px 0 8px;font-size:13px;color:var(--ink-2)}
+  pre{background:var(--code);border-radius:10px;padding:14px 16px;overflow:auto;font:12.5px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0 0 16px}
+  code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:.5px solid var(--line)}
+  th{font-weight:500;color:var(--ink-2)}
+  .note{margin-top:22px;padding:12px 14px;border:.5px solid var(--line);border-radius:10px;font-size:13px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>DeepSeek 小鲸鱼</h1>
+  <p class="sub">摆尾、跃出、落水。跳跃高度由水平距离决定，路线可以按上下文自己定义。</p>
+
+  <div class="grid">
+    <div class="card">
+      <header>浅色 · 跳过“思考过程”再回来</header>
+      <div class="chat" id="chat-a">
+        <div class="msg">帮我看看这一版鲸鱼</div>
+        <div class="msg me">我先检查一下跳跃路线</div>
+        <div class="thinking" data-route="think"><b>思考过程 44 秒</b><br>它从左边跳上去，落在块的上方，再从右边跳回水线。</div>
+        <div class="msg">高度也跟着距离变了吗</div>
+        <fatfish></fatfish>
+      </div>
+    </div>
+    <div class="card dark">
+      <header>深色 · 同样路线，更高一档淡度</header>
+      <div class="chat" id="chat-b">
+        <div class="msg">深色下也看得清</div>
+        <div class="thinking" data-route="think"><b>思考过程 12 秒</b><br>同一套路线定义，只是淡度不同。</div>
+        <div class="msg me">宽度越大跳得越高</div>
+        <fatfish ink-dark=".28"></fatfish>
+      </div>
+    </div>
+  </div>
+
+  <h2>定义一条路线</h2>
+<pre>const whale = document.querySelector('fatfish');
+
+// 路线 = 若干段跳跃，每段给起跳点和落点；高度不写就按水平距离算
+whale.routeFor = (host, size) =&gt; {
+  const r = host.querySelector('.thinking').getBoundingClientRect();
+  const h = host.getBoundingClientRect();
+  const x = v =&gt; v - h.left, y = v =&gt; v - h.top;
+  const water = host.clientHeight - 70;         // 水线
+  const top = y(r.top) - 8;                     // 块的上方
+  return [
+    { from: { x: x(r.left) - 46,  y: water }, to: { x: x(r.left) + r.width / 2, y: top } },
+    { from: { x: x(r.left) + r.width / 2, y: top }, to: { x: x(r.right) + 46, y: water } },
+  ];
+};</pre>
+
+  <h2>属性</h2>
+  <table>
+    <tr><th>属性</th><th>作用</th><th>默认</th></tr>
+    <tr><td><code>size</code></td><td>鲸鱼边长，像素</td><td>56</td></tr>
+    <tr><td><code>duration</code></td><td>单段跳跃时长</td><td>3.6s</td></tr>
+    <tr><td><code>ink</code> / <code>ink-dark</code></td><td>浅色、深色主题淡度</td><td>.13 / .2</td></tr>
+    <tr><td><code>color</code></td><td>颜色</td><td>#4D6BFE</td></tr>
+  </table>
+
+  <div class="note">只作用于网页 DOM。桌面 App 和系统窗口盖不到，那种需求要 Electron 透明置顶窗口或系统级覆盖层。系统开了“减少动态效果”时静止，不出水花。</div>
+</div>
+
+<script src="fatfish.js"></script>
+<script>
+  // 两栏都用同一条“跳过思考块”的路线
+  document.querySelectorAll('.chat').forEach((host) => {
+    const el = host.querySelector('fatfish');
+    el.routeFor = (box, size) => {
+      const block = box.querySelector('.thinking');
+      const hr = box.getBoundingClientRect();
+      const r = block.getBoundingClientRect();
+      const x = (v) => v - hr.left;
+      const y = (v) => v - hr.top;
+      const pad = size / 2 + 6;
+      const water = box.clientHeight - 74;
+      const top = Math.max(pad + 24, y(r.top) - 10);
+      const mid = x(r.left) + r.width / 2;
+      return [
+        { from: { x: Math.max(pad, x(r.left) - 52), y: water }, to: { x: mid, y: top } },
+        { from: { x: mid, y: top }, to: { x: Math.min(box.clientWidth - pad, x(r.right) + 52), y: water } },
+        { from: { x: box.clientWidth * .5, y: water }, to: { x: box.clientWidth * .5 + 150, y: water } },
+      ];
+    };
+  });
+</script>
+</body>
+</html>

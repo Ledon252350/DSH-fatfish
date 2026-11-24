@@ -1,6 +1,6 @@
-# FatFish
+# DSH-fatfish
 
-**A chubby whale that hops from chat bubble to chat bubble.**
+**A chubby whale that hops from chat bubble to chat bubble.** The DeepSeek Harness flavoured build.
 
 FatFish is a single-file, zero-dependency web widget: one `<script>`, one custom element. Drop it into any container that already looks like a conversation and it hops between the rows — tail wagging, leaping from the top of one bubble to the next, splashing a few droplets on landing.
 
